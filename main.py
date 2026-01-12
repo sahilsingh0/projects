@@ -1,43 +1,31 @@
-# Simple Calculator Program
+from flask import Flask, render_template, request, jsonify
 
-def add(x, y):
-    return x + y
+app = Flask(__name__)
 
-def subtract(x, y):
-    return x - y
+history = []
 
-def multiply(x, y):
-    return x * y
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-def divide(x, y):
-    if y == 0:
-        return "Error: Division by zero is not allowed"
-    return x / y
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    data = request.json
+    expression = data.get("expression")
 
+    try:
+        result = eval(expression)
+        entry = f"{expression} = {result}"
+        history.append(entry)
 
-def main():
-    print("Select operation:")
-    print("1. Add")
-    print("2. Subtract")
-    print("3. Multiply")
-    print("4. Divide")
+        return jsonify({
+            "result": result,
+            "history": history
+        })
 
-    choice = input("Enter choice (1/2/3/4): ")
-
-    x = float(input("Enter the first number: "))
-    y = float(input("Enter the second number: "))
-
-    if choice == '1':
-        print("Result:", add(x, y))
-    elif choice == '2':
-        print("Result:", subtract(x, y))
-    elif choice == '3':
-        print("Result:", multiply(x, y))
-    elif choice == '4':
-        print("Result:", divide(x, y))
-    else:
-        print("Invalid input")
+    except:
+        return jsonify({"error": "Invalid expression"})
 
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True)
